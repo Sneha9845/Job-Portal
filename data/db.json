@@ -1,0 +1,60 @@
+{
+  "workers": [
+    {
+      "name": "rahul",
+      "phone": "9845188362",
+      "email": "snehag9845@gmail.com",
+      "skill": "Painter",
+      "location": "Bangalore",
+      "id": "1770361974345",
+      "assignedJobId": "2",
+      "assignmentDetails": {
+        "jobId": "2",
+        "location": "Mumbai, Dadar",
+        "guideName": "Geetha",
+        "guidePhone": "7899428833",
+        "reportingTime": "Full Time",
+        "instructions": "Adhar Card",
+        "salary": "₹ 17029/mo"
+      }
+    },
+    {
+      "name": "divya",
+      "phone": "9845343014",
+      "email": "govindrajganesan@gmail.com",
+      "skill": "Cook",
+      "location": "Bangalore",
+      "id": "1770362276482",
+      "assignedJobId": "1770360512057",
+      "assignmentDetails": {
+        "jobId": "1770360512057",
+        "location": "Bangalore",
+        "guideName": "Sathya",
+        "guidePhone": "9035728939",
+        "reportingTime": "9-5",
+        "instructions": "Get ID Proof",
+        "salary": "15000"
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "id": "1",
+      "title": "Industrial Painter",
+      "location": "Electronic City",
+      "salary": "₹800/day",
+      "time": "09:00 AM",
+      "type": "Painting"
+    },
+    {
+      "id": 1770360512057,
+      "title": "Tailor",
+      "salary": "15000",
+      "location": "Bangalore",
+      "time": "9-5",
+      "color": "bg-blue-500 text-blue-700",
+      "category": "other",
+      "phone": "+91 9876543210"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; padding: 50px; background-color: white; }
+        .container { width: 80%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">DFD Level 1 - Job Portal</h1>
+        <div class="mermaid">
+graph TD
+    %% Styling
+    classDef entity fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px;
+    classDef process fill:#fff2cc,stroke:#d6b656,stroke-width:2px,rx:20,ry:20;
+    classDef store fill:#d5e8d4,stroke:#82b366,stroke-width:2px;
+
+    %% Entities
+    Worker[Worker]:::entity
+    Admin[Admin]:::entity
+    Gateway[SMS Gateway]:::entity
+
+    %% Processes
+    P1(1.0 Registration & OTP):::process
+    P2(2.0 Voice Search Logic):::process
+    P3(3.0 Job Management):::process
+    P4(4.0 Final Assignment):::process
+
+    %% Data Stores
+    D1[(MongoDB: Workers)]:::store
+    D2[(MongoDB: Jobs)]:::store
+
+    %% Data Flows
+    Worker -- "Input Mobile #" --> P1
+    P1 -- "Send OTP" --> Gateway
+    P1 -- "Save Profile" --> D1
+    
+    Worker -- "Speak Voice Query" --> P2
+    P2 -- "Search MongoDB" --> D2
+    D2 -- "Matching Result" --> P2
+    P2 -- "Show Job Cards" --> Worker
+
+    Admin -- "Assign Command" --> P4
+    P4 -- "Read Job Store" --> D2
+    P4 -- "Update Worker Store" --> D1
+    P4 -- "Trigger Job Alert" --> Gateway
+
+    Admin -- "Create New Job" --> P3
+    P3 -- "Save to MongoDB" --> D2
+        </div>
+    </div>
+</body>
+</html>

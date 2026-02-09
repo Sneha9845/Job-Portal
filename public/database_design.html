@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database ER Diagram</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <style>
+        body { margin: 0; padding: 20px; background: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .mermaid { transform: scale(1.5); transform-origin: center; }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+    erDiagram
+        Worker {
+            string workerId PK
+            string name
+            string phoneNumber
+            string[] skills
+            string languagePreference
+            string status
+            object location
+        }
+
+        JobListing {
+            string jobId PK
+            string title
+            string description
+            string wages
+            date reportingTime
+            string status
+            string location
+            string adminId FK
+        }
+
+        Admin {
+            string adminId PK
+            string username
+            string role
+            string contactInfo
+        }
+
+        Assignment {
+            string assignmentId PK
+            string workerId FK
+            string jobId FK
+            string status
+            datetime assignedAt
+        }
+
+        SMSLog {
+            string messageId PK
+            string recipientPhone
+            string content
+            string status
+            datetime sentAt
+        }
+
+        Worker ||--o{ Assignment : "accepts"
+        Admin ||--o{ JobListing : "manages"
+        JobListing ||--o{ Assignment : "has"
+        Assignment ||--|| SMSLog : "triggers"
+        Worker ||--o{ SMSLog : "receives"
+    </div>
+</body>
+</html>
