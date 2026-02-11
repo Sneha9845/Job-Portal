@@ -26,7 +26,7 @@ Finding daily wage work or hiring unskilled labor often relies on informal netwo
 
 This project was a great journey in building scalable, user-centric applications. Check out the repository below to see the architecture and code!
 
-[GitHub Repo Link: https://github.com/YOUR_USERNAME/job-portal]
+[GitHub Repo Link: https://github.com/Sneha9845/Job-Portal]
 
 #NextJS #WebDevelopment #FullStack #MongoDB #Innovation #SocialImpact #JobPortal #Coding
 
