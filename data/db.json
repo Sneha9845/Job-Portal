@@ -31,10 +31,20 @@
         "location": "Bangalore",
         "guideName": "Sathya",
         "guidePhone": "9035728939",
-        "reportingTime": "9-5",
+        "reportingTime": "09:00 AM - 05:00 PM",
         "instructions": "Get ID Proof",
-        "salary": "15000"
+        "salary": "₹ 15,000"
       }
+    },
+    {
+      "name": "Sneha",
+      "phone": "7483092843",
+      "email": "govindrajganesan@gmail.com",
+      "skill": "Other",
+      "location": "Bangalore",
+      "id": "1770718999058",
+      "assignedJobId": null,
+      "assignmentDetails": null
     }
   ],
   "jobs": [
@@ -42,19 +52,29 @@
       "id": "1",
       "title": "Industrial Painter",
       "location": "Electronic City",
-      "salary": "₹800/day",
-      "time": "09:00 AM",
+      "salary": "₹ 800/day",
+      "time": "09:00 AM - 06:00 PM",
       "type": "Painting"
     },
     {
       "id": 1770360512057,
       "title": "Tailor",
-      "salary": "15000",
+      "salary": "₹ 15,000",
       "location": "Bangalore",
-      "time": "9-5",
+      "time": "09:00 AM - 05:00 PM",
       "color": "bg-blue-500 text-blue-700",
       "category": "other",
       "phone": "+91 9876543210"
+    },
+    {
+      "id": 1770720000000,
+      "title": "Stay-In Maid",
+      "salary": "₹ 12,000/mo",
+      "location": "Chennai",
+      "time": "Stay-In (Live-in)",
+      "color": "bg-pink-500 text-pink-700",
+      "category": "helper",
+      "phone": "+91 9003011223"
     }
   ]
 }

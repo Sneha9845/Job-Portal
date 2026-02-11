@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useJobs } from "../../context/JobContext";
 import { useLanguage } from "../../context/LanguageContext";
+import JobMap from "../../components/JobMap";
 import { ArrowLeft, MapPin, Clock, Banknote, Phone, Briefcase } from "lucide-react";
 import Link from "next/link";
 
@@ -115,6 +116,14 @@ export default function JobDetailsPage() {
                                         <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Job Type</p>
                                         <p className="text-slate-800 font-semibold">Daily Wage</p>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Map Section */}
+                            <div className="mb-8">
+                                <h3 className="text-lg font-bold text-slate-800 mb-3">Job Location</h3>
+                                <div className="h-[300px] w-full rounded-xl overflow-hidden border border-slate-200">
+                                    <JobMap location={job.location} />
                                 </div>
                             </div>
 

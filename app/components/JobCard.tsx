@@ -31,6 +31,10 @@ export default function JobCard({ id, title, salary, location, time, color, phon
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
                         {location}
+                        <span className="inline-flex items-center gap-1 text-[10px] bg-indigo-50 text-primary px-2 py-0.5 rounded-full font-bold transition-all ml-2 border border-indigo-100 shadow-sm">
+                            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                            {t('job.location')} Map
+                        </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">

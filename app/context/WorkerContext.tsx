@@ -32,6 +32,8 @@ interface WorkerContextType {
     currentWorker: Worker | null;
     loginWorker: (phone: string) => boolean;
     logoutWorker: () => void;
+    reportComplaint: (complaint: { workerId: string; type: string; message: string }) => Promise<void>;
+    completeAssignment: (workerId: string) => Promise<void>;
 }
 
 const WorkerContext = createContext<WorkerContextType | undefined>(undefined);
@@ -208,8 +210,33 @@ export function WorkerProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const reportComplaint = async (complaint: { workerId: string; type: string; message: string }) => {
+        try {
+            const res = await fetch("/api/complaints", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(complaint)
+            });
+            if (res.ok) {
+                alert("Your complaint has been registered. The admin team will review it.");
+            }
+        } catch (error) {
+            console.error("Error reporting complaint:", error);
+        }
+    };
+
+    const completeAssignment = async (workerId: string) => {
+        try {
+            await unassignJob(workerId);
+            // After unassigning, the worker is free for another job
+            alert("Good job! You are now available for new assignments.");
+        } catch (error) {
+            console.error("Error completing assignment:", error);
+        }
+    };
+
     return (
-        <WorkerContext.Provider value={{ workers, registerWorker, assignJob, unassignJob, deleteWorker, currentWorker, loginWorker, logoutWorker }}>
+        <WorkerContext.Provider value={{ workers, registerWorker, assignJob, unassignJob, deleteWorker, currentWorker, loginWorker, logoutWorker, reportComplaint, completeAssignment }}>
             {children}
         </WorkerContext.Provider>
     );

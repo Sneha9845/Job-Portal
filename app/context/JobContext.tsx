@@ -41,7 +41,7 @@ const generateJobs = () => {
             title: type.title,
             salary: salary,
             location: loc,
-            time: Math.random() > 0.5 ? "Full Time" : "9 AM - 6 PM",
+            time: Math.random() > 0.5 ? "Full Time" : "09:00 AM - 06:00 PM",
             color: type.color,
             category: type.category,
             phone: `+91 9876543210` // Standard Admin/Office Number
@@ -54,8 +54,9 @@ const DEFAULT_JOBS: Job[] = generateJobs();
 
 interface JobContextType {
     jobs: Job[];
-    addJob: (job: Omit<Job, "id">) => void;
+    addJob: (job: Omit<Job, "id">) => Promise<void>;
     deleteJob: (id: number) => void;
+    fetchJobs: () => Promise<void>;
 }
 
 const JobContext = createContext<JobContextType | undefined>(undefined);
@@ -108,7 +109,7 @@ export function JobProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <JobContext.Provider value={{ jobs, addJob, deleteJob }}>
+        <JobContext.Provider value={{ jobs, addJob, deleteJob, fetchJobs }}>
             {children}
         </JobContext.Provider>
     );

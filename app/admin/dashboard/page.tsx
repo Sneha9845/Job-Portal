@@ -1,8 +1,9 @@
 "use client";
 
-import { Plus, Users, Briefcase, X, LogOut, Trash2 } from "lucide-react";
+import { Plus, Users, Briefcase, X, LogOut, Trash2, AlertCircle, Clock, MapPin as MapPinIcon, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import JobCard from "../../components/JobCard";
+import JobMap from "../../components/JobMap";
 import { useJobs } from "../../context/JobContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
@@ -11,12 +12,26 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-    const { jobs, addJob } = useJobs();
+    const { jobs, addJob, fetchJobs } = useJobs();
     const { t } = useLanguage();
     const { user, logout, isAuthenticated } = useAuth();
     const { workers, assignJob, unassignJob, deleteWorker } = useWorkers();
     const router = useRouter();
     const [showForm, setShowForm] = useState(false);
+    const [complaints, setComplaints] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchComplaints = async () => {
+            const res = await fetch("/api/complaints");
+            if (res.ok) {
+                const data = await res.json();
+                setComplaints(data);
+            }
+        };
+        fetchComplaints();
+        const interval = setInterval(fetchComplaints, 10000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Form State (moved up)
     const [newJob, setNewJob] = useState({
@@ -37,9 +52,35 @@ export default function DashboardPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Automatic Formatting for Salary (Rs/₹)
+        let formattedSalary = newJob.salary.trim();
+        if (!formattedSalary.includes("₹") && !formattedSalary.toLowerCase().includes("rs")) {
+            formattedSalary = `₹ ${formattedSalary}`;
+        }
+        if (!formattedSalary.includes("/") && !formattedSalary.toLowerCase().includes("per")) {
+            formattedSalary = `${formattedSalary}/day`; // Default to daily if not specified
+        }
+
+        // Automatic Formatting for Time (AM/PM)
+        let formattedTime = newJob.time.trim();
+        // If user just types "9-5", convert to "09:00 AM - 05:00 PM"
+        if (formattedTime.toLowerCase() === "full time") {
+            formattedTime = "Full Time";
+        } else if (formattedTime.toLowerCase().includes("stay") || formattedTime.toLowerCase().includes("live")) {
+            formattedTime = "Stay-In (Live-in)";
+        } else if (formattedTime && !formattedTime.includes("AM") && !formattedTime.includes("PM")) {
+            // Very simple heuristic: if it contains a dash, try to split and add AM/PM
+            const parts = formattedTime.split("-");
+            if (parts.length === 2) {
+                formattedTime = `${parts[0].trim()}:00 AM - ${parts[1].trim()}:00 PM`;
+            }
+        }
+
         addJob({
             ...newJob,
-            title: newJob.title,
+            salary: formattedSalary,
+            time: formattedTime,
         });
         setShowForm(false);
         setNewJob({ title: "", salary: "", location: "", time: "", color: "bg-blue-500 text-blue-700", category: "" });
@@ -71,14 +112,32 @@ export default function DashboardPage() {
         }
 
         if (assignmentModal.workerId && assignmentData.jobId) {
+            // Automatic Formatting for Assignment Override
+            let finalSalary = assignmentData.salary.trim();
+            if (finalSalary && !finalSalary.includes("₹") && !finalSalary.toLowerCase().includes("rs")) {
+                finalSalary = `₹ ${finalSalary}`;
+            }
+
+            let finalTime = assignmentData.reportingTime.trim();
+            if (finalTime && !finalTime.includes("AM") && !finalTime.includes("PM") && finalTime.toLowerCase() !== "full time") {
+                if (finalTime.toLowerCase().includes("stay") || finalTime.toLowerCase().includes("live")) {
+                    finalTime = "Stay-In (Live-in)";
+                } else if (finalTime.includes("-")) {
+                    const parts = finalTime.split("-");
+                    finalTime = `${parts[0].trim()}:00 AM - ${parts[1].trim()}:00 PM`;
+                } else if (!isNaN(Number(finalTime))) {
+                    finalTime = `${finalTime}:00 AM`; // Simple heuristic for single number
+                }
+            }
+
             assignJob(assignmentModal.workerId, {
                 jobId: assignmentData.jobId,
                 location: assignmentData.location,
                 guideName: assignmentData.guideName,
                 guidePhone: assignmentData.guidePhone,
-                reportingTime: assignmentData.reportingTime,
+                reportingTime: finalTime,
                 instructions: assignmentData.instructions,
-                salary: assignmentData.salary
+                salary: finalSalary
             });
             setAssignmentModal({ show: false, workerId: null, workerName: "" });
             // Reset form
@@ -154,6 +213,11 @@ export default function DashboardPage() {
                                 <div>
                                     <label className="text-sm font-semibold text-gray-600">Reporting Location (Exact)</label>
                                     <input required placeholder="e.g. Gate No 4, Phoenix Mall" value={assignmentData.location} onChange={e => setAssignmentData({ ...assignmentData, location: e.target.value })} className="border p-2 rounded w-full mt-1" />
+                                    {assignmentData.location && (
+                                        <div className="mt-2 h-[150px] w-full rounded-lg overflow-hidden border border-gray-200">
+                                            <JobMap location={assignmentData.location} />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -169,8 +233,8 @@ export default function DashboardPage() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-sm font-semibold text-gray-600">Reporting Time</label>
-                                        <input required placeholder="e.g. 9:00 AM" value={assignmentData.reportingTime} onChange={e => setAssignmentData({ ...assignmentData, reportingTime: e.target.value })} className="border p-2 rounded w-full mt-1" />
+                                        <label className="text-sm font-semibold text-gray-600">Reporting Time (with AM/PM)</label>
+                                        <input required placeholder="e.g. 09:30 AM" value={assignmentData.reportingTime} onChange={e => setAssignmentData({ ...assignmentData, reportingTime: e.target.value })} className="border p-2 rounded w-full mt-1" />
                                     </div>
                                     <div>
                                         <label className="text-sm font-semibold text-gray-600">Salary</label>
@@ -204,7 +268,15 @@ export default function DashboardPage() {
                             </div>
                             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                                 <input required placeholder="Job Title (e.g. Driver)" value={newJob.title} onChange={e => setNewJob({ ...newJob, title: e.target.value })} className="border p-2 rounded" />
-                                <input required placeholder="Salary (e.g. ₹ 15000/mo)" value={newJob.salary} onChange={e => setNewJob({ ...newJob, salary: e.target.value })} className="border p-2 rounded" />
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Salary/Wage</label>
+                                    <input required placeholder="e.g. ₹ 600/day or ₹ 15,000/mo" value={newJob.salary} onChange={e => setNewJob({ ...newJob, salary: e.target.value })} className="border p-2 rounded w-full" />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Work Hours (AM/PM or Stay-In)</label>
+                                    <input required placeholder="e.g. 09:00 AM - 06:00 PM or 'Stay-In'" value={newJob.time} onChange={e => setNewJob({ ...newJob, time: e.target.value })} className="border p-2 rounded w-full" />
+                                </div>
 
                                 <select required value={newJob.location} onChange={e => setNewJob({ ...newJob, location: e.target.value })} className="border p-2 rounded">
                                     <option value="">Select Location</option>
@@ -218,7 +290,6 @@ export default function DashboardPage() {
                                     <option value="Pune">Pune</option>
                                 </select>
 
-                                <input required placeholder="Time (e.g. 9-5)" value={newJob.time} onChange={e => setNewJob({ ...newJob, time: e.target.value })} className="border p-2 rounded" />
                                 <select value={newJob.category} onChange={e => setNewJob({ ...newJob, category: e.target.value })} className="border p-2 rounded">
                                     <option value="">Select Category</option>
                                     <option value="driver">Driver</option>
@@ -263,8 +334,53 @@ export default function DashboardPage() {
                     </button>
                 </div>
 
+                {/* Worker Complaints Section */}
+                {complaints.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                            <AlertCircle size={24} /> Worker Feedback & Complaints
+                        </h2>
+                        <div className="flex flex-col gap-3">
+                            {complaints.map((c: any) => {
+                                const worker = workers.find(w => w.id === c.workerId);
+                                return (
+                                    <div key={c.id} className="bg-white p-4 rounded-xl border-l-4 border-red-500 shadow-sm flex flex-col md:flex-row justify-between gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-bold text-gray-800">{worker?.name || "Unknown Worker"}</span>
+                                                <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase">{c.type}</span>
+                                                <span className="text-xs text-gray-400">{new Date(c.timestamp).toLocaleString()}</span>
+                                            </div>
+                                            <p className="text-sm text-gray-600 italic">"{c.message}"</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    // Simple way to handle: just alert or open worker details
+                                                    alert(`Worker Phone: ${worker?.phone}\nLocation: ${worker?.location}`);
+                                                }}
+                                                className="text-xs font-bold text-blue-600 hover:underline"
+                                            >
+                                                Contact Worker
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {/* Recent Job Posts */}
-                <h2 className="text-xl font-bold text-gray-800 mb-4">{t("admin.recentListings")}</h2>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-800">{t("admin.recentListings")}</h2>
+                    <button
+                        onClick={() => fetchJobs()}
+                        className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                    >
+                        <RefreshCcw size={14} /> Refresh List
+                    </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {jobs.map((job) => (
                         <JobCard key={job.id} {...job} isAdmin={true} />
